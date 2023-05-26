@@ -1,0 +1,92 @@
+name: Build + tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: "Build + tests"
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.20.4
+
+    - name: Build
+      run: |
+        make build
+
+    - name: Run unit tests
+      run: |
+        go install github.com/kyoh86/richgo@v0.3.12
+        set -o pipefail
+        make test | richgo testfilter
+      env:
+        RICHGO_FORCE_COLOR: 1
+
+    - name: Cache virtualenvs
+      id: cache-pipenv
+      uses: actions/cache@v3
+      with:
+        path: ~/.local/share/virtualenvs
+        key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+
+    - name: Install functional test dependencies
+      run: |
+        sudo apt install -y nftables iptables ipset
+        docker network create net-test
+        python3 -m pip install --upgrade pipenv wheel
+        pipenv install --deploy
+        # some tests need root, so we have to install pytest twice
+        sudo python3 -m pip install --upgrade pipenv wheel
+        sudo pipenv install --deploy
+
+    - name: Run functional tests
+      env:
+        CROWDSEC_TEST_VERSION: dev
+        CROWDSEC_TEST_FLAVORS: full
+        CROWDSEC_TEST_NETWORK: net-test
+        CROWDSEC_TEST_TIMEOUT: 60
+        PYTEST_ADDOPTS: --durations=0 -vv --color=yes -m "not (deb or rpm)"
+      run: |
+        # everything except for
+        # - install (requires root, ignored by default)
+        # - backends (requires root, ignored by default)
+        # - deb/rpm (on their own workflows)
+        pipenv run pytest
+        # these need root
+        sudo -E pipenv run pytest ./test/backends
+        sudo -E pipenv run pytest ./test/install/no_crowdsec
+        # these need a running crowdsec
+        docker run -d --name crowdsec -e CI_TESTING=true -e DISABLE_ONLINE_API=true -ti asians-cloud/crowdsec
+        install -m 0755 /dev/stdin /usr/local/bin/cscli <<'EOT'
+        #!/bin/sh
+        docker exec crowdsec cscli "$@"
+        EOT
+        sleep 5
+        sudo -E pipenv run pytest ./test/install/with_crowdsec
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: v1.51
+        args: --issues-exit-code=1 --timeout 10m
+        only-new-issues: false
+        # the cache is already managed above, enabling it here
+        # gives errors when extracting
+        skip-pkg-cache: true
+        skip-build-cache: true

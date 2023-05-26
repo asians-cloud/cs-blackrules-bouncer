@@ -1,0 +1,19 @@
+Source: crowdsec-blackrule-bouncer
+Maintainer: Crowdsec Team <debian@crowdsec.net>
+Build-Depends: debhelper
+Section: admin
+Priority: optional
+
+Package: crowdsec-blackrule-bouncer-iptables
+Architecture: any
+Description: Firewall bouncer for Crowdsec (iptables+ipset)
+Depends: gettext-base, iptables, ipset
+Replaces: crowdsec-blackrule-bouncer
+Conflicts: crowdsec-blackrule-bouncer-nftables
+
+Package: crowdsec-blackrule-bouncer-nftables
+Architecture: any
+Description: Firewall bouncer for Crowdsec (nftables)
+Depends: gettext-base, nftables
+Replaces: crowdsec-blackrule-bouncer
+Conflicts: crowdsec-blackrule-bouncer-iptables
