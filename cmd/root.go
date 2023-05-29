@@ -13,7 +13,7 @@ import (
 	"syscall"
 
 	"github.com/coreos/go-systemd/v22/daemon"
-	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/crowdsecurity/crowdsec/pkg/models"
 	csbouncer "github.com/asians-cloud/go-cs-bouncer"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

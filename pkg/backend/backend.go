@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/crowdsecurity/crowdsec/pkg/models"
 	"github.com/asians-cloud/cs-blackrules-bouncer/pkg/cfg"
 	"github.com/asians-cloud/cs-blackrules-bouncer/pkg/iptables"
 	"github.com/asians-cloud/cs-blackrules-bouncer/pkg/nftables"

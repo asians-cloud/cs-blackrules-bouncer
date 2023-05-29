@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/asians-cloud/crowdsec/pkg/models"
+	"github.com/crowdsecurity/crowdsec/pkg/models"
 )
 
 type Backend interface {
