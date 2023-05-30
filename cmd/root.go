@@ -53,7 +53,7 @@ func HandleSignals(ctx context.Context) error {
 func deleteDecisions(backend *backend.BackendCTX, decisions []*models.Decision, config *cfg.BouncerConfig) {
 	nbDeletedDecisions := 0
 	for _, d := range decisions {
-                if strings.ToLower(*d.Scenario) != "blackrule" {
+                if !slices.Contains([]string{"blackrule"}, strings.ToLower(*d.Scenario)) {
                   continue
                 }
 
