@@ -53,9 +53,6 @@ func HandleSignals(ctx context.Context) error {
 func deleteDecisions(backend *backend.BackendCTX, decisions []*models.Decision, config *cfg.BouncerConfig) {
 	nbDeletedDecisions := 0
 	for _, d := range decisions {
-                if !strings.Contains(strings.ToLower(*d.Scenario), "blackrule") {
-                  continue
-                }
 
 		if !slices.Contains(config.SupportedDecisionsTypes, strings.ToLower(*d.Type)) {
 			log.Debugf("decisions for ip '%s' will not be deleted because its type is '%s'", *d.Value, *d.Type)
@@ -89,10 +86,6 @@ func deleteDecisions(backend *backend.BackendCTX, decisions []*models.Decision, 
 func addDecisions(backend *backend.BackendCTX, decisions []*models.Decision, config *cfg.BouncerConfig) {
 	nbNewDecisions := 0
 	for _, d := range decisions {
-                if !strings.Contains(strings.ToLower(*d.Scenario), "blackrule") {
-                  continue
-                }
-
 
 		if !slices.Contains(config.SupportedDecisionsTypes, strings.ToLower(*d.Type)) {
 			log.Debugf("decisions for ip '%s' will not be added because its type is '%s'", *d.Value, *d.Type)
